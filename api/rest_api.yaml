@@ -1,0 +1,528 @@
+openapi: 3.0.0
+
+tags:
+  - name: User
+  - name: Posts
+  - name: Chats
+  - name: Media
+
+info:
+  title: Social Network API
+  description: Current API describes interaction with Social Network
+  version: 1.0.0
+
+paths:
+  /user/{user_id}:
+    get:
+      summary: Get user profile
+      description: Method to get user profile by user id
+      tags: 
+        - User
+      parameters:
+        - name: user_id
+          in: path
+          description: id of returned user profile
+          required: true
+          schema:
+            type: integer
+            format: uint64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+  /user/{user_id}/add:
+    post:
+      summary: Friend request
+      description: Method to friend request
+      tags: 
+        - User
+      parameters:
+        - name: user_id
+          in: path
+          description: id of user to friend request
+          required: true
+          schema:
+            type: integer
+            format: uint64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+
+  /user/{user_id}/delete:
+    delete:
+      summary: Delete user from friends
+      description: Method to delete user from friends
+      tags: 
+        - User
+      parameters:
+        - name: user_id
+          in: path
+          description: id of user to delete from friends
+          required: true
+          schema:
+            type: integer
+            format: uint64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+  /user/{user_id}/friends:
+    get:
+      summary: Get user friends list
+      description: Method to get user friends list
+      tags: 
+        - User
+      parameters:
+        - name: user_id
+          in: path
+          description: id of returned user friends
+          required: true
+          schema:
+            type: integer
+            format: uint64
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset  
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Profile'
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+  /user/{user_id}/posts:
+    get:
+      summary: Get user posts feed
+      description: Method to get user posts feed based on recommendations
+      tags: 
+        - User
+      parameters:
+        - name: user_id
+          in: path
+          description: id of user to get posts
+          required: true
+          schema:
+            type: integer
+            format: uint64
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset  
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Post'
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+  /posts:
+    post:
+      summary: Create post
+      description: Method to create post and publicate it
+      tags: 
+        - Posts
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset  
+          in: query
+          schema:
+            type: integer
+            default: 0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  description: Text for post
+                media_files:
+                  schema:
+                    items:
+                      schema:
+                        type: string               
+            example:
+              description: "Text for post"
+              media_files: ["http://qwerty.jpeg"]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Post'
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+    get:
+      summary: Get user recommendations posts feed
+      description: Method to get user posts feed based on recommendations
+      tags: 
+        - Posts
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Post'
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+  /posts/{post_id}:
+    get:
+      summary: Get post by post_id
+      description: Method to get post
+      tags: 
+        - Posts
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Post'
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+    delete:
+      summary: Delete user post by post_id
+      description: Method to delete user post by post_id
+      tags: 
+        - Posts
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: OK
+        400:
+          description: Bad Request
+        500:
+          description: Server error      
+  /media:
+    post:
+      summary: Get media for posts
+      description: Method to get media files for posts
+      tags: 
+        - Media
+      requestBody:
+        content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  file:
+                    type: string
+                    format: binary
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  media_id:
+                    type: integer
+                    format: uint64
+                  url:
+                    type: string
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+  /chats:
+    get:
+      summary: Get chats list
+      description: Method to get chats list of user
+      tags: 
+        - Chats
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset  
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Chat'
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+  /chats/{chat_id}/messages:
+    post:
+      summary: Send message to chat
+      description: Method to send message to chat
+      tags: 
+        - Chats
+      parameters:
+        - name: chat_id
+          in: path
+          description: id of returned chat
+          required: true
+          schema:
+            type: integer
+            format: uint64
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset  
+          in: query
+          schema:
+            type: integer
+            default: 0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: Text for message
+                media_files:
+                  schema:
+                    items:
+                      schema:
+                        type: string               
+            example:
+              description: "Text for message"
+              media_files: ["http://qwerty.jpeg"]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+    get:
+      summary: Get chats list
+      description: Method to get chats list of user
+      tags: 
+        - Chats
+      parameters:
+        - name: chat_id
+          in: path
+          description: id of returned chat
+          required: true
+          schema:
+            type: integer
+            format: uint64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+  
+
+components:
+ schemas:
+  Profile:
+    type: object
+    properties:
+      user_id:
+        type: integer
+        format: uint64
+        example: 10
+      name:
+        type: string
+        example: "Александр"
+      photo:
+        type: string
+        example: "http://qwerty.jpeg"
+      posts:
+        type: array
+        items:
+          $ref: '#/components/schemas/Post'
+
+  Post:
+    type: object
+    properties:
+      post_id:
+        type: integer
+        format: uint64
+      author_id:
+        type: integer
+        format: uint64
+      description:
+        type: string
+      media_id:
+        type: integer
+        format: uint64
+      likes:
+        type: integer
+        format: uint32
+      comments:
+        type: array
+        items:
+          $ref: '#/components/schemas/Comment'
+
+  Media:
+    type: object
+    properties:
+      media_id:
+        type: integer
+        format: uint64
+      url:
+        type: string
+        example: "http://qwerty.jpeg"
+
+  Comment:
+    type: object
+    properties:
+      user_id:
+        type: integer
+        format: uint64
+      text:
+        type: string
+      likes:
+        type: integer
+        format: uint32
+
+  Chat:
+    type: object
+    properties:
+      chat_id:
+        type: integer
+        format: uint64
+      is_chat:
+        type: bool
+      participants:
+        type: array
+        items:
+          type: object
+          properties:
+            user_id:
+              type: integer
+              format: uint64
+      last_message:
+        type: string
+      photo:  
+        type: string
+        format: url
+  
+  Message:
+    type: object
+    properties:
+      message_id:
+        type: integer
+        format: uint64
+      text:
+        type: string
+      date:
+        type: string
+        format: date-time
+      media: 
+        type: array
+        items:
+          $ref: '#/components/schemas/Media'
